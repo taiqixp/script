@@ -1,0 +1,16 @@
+[
+  {
+    "suburb": "Glen Waverley 3150",
+    "house_increase": 10.44,
+    "unit_increase": 10.44,
+    "house_value": 932011.0,
+    "unit_value": 932011.0
+  },
+  {
+    "suburb": "Mount Waverley 3149",
+    "house_increase": 16.54,
+    "unit_increase": 16.54,
+    "house_value": 1117345.0,
+    "unit_value": 1117345.0
+  }
+]
