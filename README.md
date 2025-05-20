@@ -11,6 +11,31 @@
 - 支持房价上涨和下跌的情况
 - 自动计算租金回报率
 
+## 主要脚本说明
+
+项目包含三个主要的Python脚本，各自功能如下：
+
+### 1. multi_suburb_scraper.py
+- 主要爬虫脚本，支持批量抓取34个墨尔本郊区的数据
+- 实现了断点续传功能，可以跳过已经抓取的区域
+- 支持实时保存数据，每抓取一个区域就保存一次
+- 包含了完整的反爬虫机制和错误处理
+- 输出格式为Markdown表格，便于阅读和分析
+
+### 2. property_analyzer.py
+- 数据分析脚本，专注于处理和分析已获取的房产数据
+- 支持生成多种格式的报告（Markdown、CSV、JSON）
+- 提供了多维度的数据排序（房价、租金回报率、年度涨幅）
+- 自动生成数据可视化报告
+- 包含更详细的数据统计和分析功能
+
+### 3. house_price_scraper.py
+- 单一区域的房产数据爬虫（以Glen Waverley为例）
+- 包含基础的数据分析功能
+- 可以生成价格趋势图
+- 支持历史数据对比（1年、5年、10年）
+- 适合测试和开发新功能
+
 ## 使用方法
 
 1. 安装依赖：
@@ -20,12 +45,20 @@ pip install -r requirements.txt
 
 2. 运行脚本：
 ```bash
-python multi_suburb_scraper.py
+python multi_suburb_scraper.py  # 批量抓取所有区域
+python property_analyzer.py     # 分析已获取的数据
+python house_price_scraper.py   # 抓取单一区域数据
 ```
 
 ## 数据输出
 
-脚本会生成一个 `suburb_analysis.md` 文件，包含以下信息：
+脚本会生成以下文件：
+- `suburb_analysis.md`: 主要数据报告（Markdown格式）
+- `property_report.md`: 详细分析报告
+- `property_data.json`: JSON格式的原始数据
+- `price_trend.png`: 价格趋势图
+
+数据内容包括：
 - 地区名称
 - 房屋/公寓中位价格
 - 5年价格涨幅
