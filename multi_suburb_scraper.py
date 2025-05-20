@@ -288,12 +288,12 @@ def save_results(data, filename='suburb_analysis.md', append_mode=False):
             
         for suburb_data in suburb_data_list:
             suburb = suburb_data['suburb']
-            # 写入房屋数据
+            # 写入house数据
             house_rent = f"${suburb_data['house_rent']:.0f}" if suburb_data['house_rent'] else "-"
-            f.write(f"| {suburb_data['date']} | {suburb} | 房屋 | ${suburb_data['house_value']:,.0f} | {suburb_data['house_increase']}% | {house_rent} | {suburb_data['house_yield']} |\n")
-            # 写入公寓数据
+            f.write(f"| {suburb_data['date']} | {suburb} | house | ${suburb_data['house_value']:,.0f} | {suburb_data['house_increase']}% | {house_rent} | {suburb_data['house_yield']} |\n")
+            # 写入unit数据
             unit_rent = f"${suburb_data['unit_rent']:.0f}" if suburb_data['unit_rent'] else "-"
-            f.write(f"| {suburb_data['date']} | {suburb} | 公寓 | ${suburb_data['unit_value']:,.0f} | {suburb_data['unit_increase']}% | {unit_rent} | {suburb_data['unit_yield']} |\n")
+            f.write(f"| {suburb_data['date']} | {suburb} | unit | ${suburb_data['unit_value']:,.0f} | {suburb_data['unit_increase']}% | {unit_rent} | {suburb_data['unit_yield']} |\n")
     
     print(f"\n数据已保存到 {filename}")
     
@@ -301,16 +301,16 @@ def save_results(data, filename='suburb_analysis.md', append_mode=False):
     print("\n分析结果:")
     for suburb_data in suburb_data_list:
         print(f"\n{suburb_data['suburb']}:")
-        print(f"房屋中位价值: ${suburb_data['house_value']:,.2f}")
-        print(f"房屋5年涨幅: {suburb_data['house_increase']}%")
+        print(f"house中位价值: ${suburb_data['house_value']:,.2f}")
+        print(f"house5年涨幅: {suburb_data['house_increase']}%")
         if suburb_data['house_rent']:
-            print(f"房屋周租金: ${suburb_data['house_rent']:.2f}")
-            print(f"房屋租金回报率: {suburb_data['house_yield']}")
-        print(f"公寓中位价值: ${suburb_data['unit_value']:,.2f}")
-        print(f"公寓5年涨幅: {suburb_data['unit_increase']}%")
+            print(f"house周租金: ${suburb_data['house_rent']:.2f}")
+            print(f"house租金回报率: {suburb_data['house_yield']}")
+        print(f"unit中位价值: ${suburb_data['unit_value']:,.2f}")
+        print(f"unit5年涨幅: {suburb_data['unit_increase']}%")
         if suburb_data['unit_rent']:
-            print(f"公寓周租金: ${suburb_data['unit_rent']:.2f}")
-            print(f"公寓租金回报率: {suburb_data['unit_yield']}")
+            print(f"unit周租金: ${suburb_data['unit_rent']:.2f}")
+            print(f"unit租金回报率: {suburb_data['unit_yield']}")
 
 def read_existing_data(filename='suburb_analysis.md'):
     """读取现有的 Markdown 文件并返回已存在的区域"""
