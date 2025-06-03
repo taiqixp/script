@@ -205,9 +205,16 @@ def get_property_data(url, driver):
                     return None
             
             # 提取日期信息
-            date_match = re.search(r'As at ([\w\s]+):', stats_text)
+            date_match = re.search(r'As at (\d+ \w+ \d+)', stats_text)
+            if not date_match:
+                # 尝试从完整页面文本中查找
+                full_text = driver.find_element(By.TAG_NAME, "body").text
+                date_match = re.search(r'As at (\d+ \w+ \d+)', full_text)
+            
             if date_match:
+                # 解析日期，例如 "30 April 2025"
                 report_date = datetime.strptime(date_match.group(1), '%d %B %Y').strftime('%Y.%m.%d')
+                print(f"从网页提取到日期: {date_match.group(1)} -> {report_date}")
             else:
                 # 使用当前月份减1作为日期
                 current_date = datetime.now()
@@ -217,6 +224,7 @@ def get_property_data(url, driver):
                 else:
                     last_month_date = current_date.replace(month=current_date.month - 1)
                 report_date = last_month_date.strftime('%Y.%m.%d')
+                print(f"未找到日期信息，使用计算的日期: {report_date}")
             
             # 提取并转换数据，移除逗号
             house_value = float(house_value_match.group(1).replace(',', ''))
@@ -385,27 +393,22 @@ def main():
                 try:
                     suburb_name = url.split('/')[-1].replace('-', ' ').title()
                     
-                    # 生成当前数据的日期（当前月份减1）
-                    current_date = datetime.now()
-                    if current_date.month == 1:
-                        # 如果是1月，则变为去年12月
-                        last_month_date = current_date.replace(year=current_date.year - 1, month=12)
-                    else:
-                        last_month_date = current_date.replace(month=current_date.month - 1)
-                    check_date = last_month_date.strftime('%Y.%m.%d')
-                    
-                    # 检查日期和区域组合是否已存在
-                    if (check_date, suburb_name) in existing_data:
-                        print(f"\n跳过 {suburb_name} - 该区域在 {check_date} 的数据已存在")
-                        skipped_count += 1
-                        continue
-                    
                     print(f"\n处理进度: {i}/{total_suburbs}")
+                    
+                    # 先获取数据，这样可以知道网页上的实际日期
                     data = get_property_data(url, driver)
                     if data:
-                        # 立即保存单个区域的数据
-                        save_results(data, append_mode=(success_count > 0 or len(existing_data) > 0))
-                        success_count += 1
+                        # 使用从网页提取的日期来检查是否已存在
+                        if (data['date'], suburb_name) in existing_data:
+                            print(f"\n{suburb_name} 在 {data['date']} 的数据已存在，跳过")
+                            skipped_count += 1
+                        else:
+                            # 立即保存单个区域的数据
+                            save_results(data, append_mode=(success_count > 0 or len(existing_data) > 0))
+                            success_count += 1
+                            print(f"成功保存 {suburb_name} 的数据")
+                    else:
+                        print(f"无法获取 {suburb_name} 的数据")
                     random_sleep()  # 在请求之间随机等待
                 except Exception as e:
                     print(f"处理 {url} 时发生错误: {str(e)}")
@@ -415,7 +418,7 @@ def main():
             print(f"\n任务完成:")
             print(f"成功分析了 {success_count}/{total_suburbs} 个郊区的数据")
             print(f"跳过了 {skipped_count} 个已有数据的郊区")
-            print(f"md文件直接复制到前端")
+            print(f"md文件内容直接复制到前端ai，让他更新到page中")
             break  # 如果成功完成，跳出重试循环
             
         except Exception as e:
