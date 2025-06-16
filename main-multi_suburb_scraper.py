@@ -395,11 +395,39 @@ def main():
                     
                     print(f"\n处理进度: {i}/{total_suburbs}")
                     
-                    # 先获取数据，这样可以知道网页上的实际日期
+                    # 预先计算预期的日期（上个月的最后一天）
+                    current_date = datetime.now()
+                    if current_date.month == 1:
+                        # 如果是1月，则变为去年12月
+                        last_month = current_date.replace(year=current_date.year - 1, month=12, day=31)
+                    else:
+                        # 获取上个月的最后一天
+                        last_month = current_date.replace(month=current_date.month - 1, day=1)
+                        # 计算上个月的最后一天
+                        if last_month.month == 12:
+                            next_month = last_month.replace(year=last_month.year + 1, month=1)
+                        else:
+                            next_month = last_month.replace(month=last_month.month + 1)
+                        last_day_of_last_month = next_month - timedelta(days=1)
+                        last_month = last_day_of_last_month
+                    
+                    expected_date = last_month.strftime('%Y.%m.%d')
+                    
+                    # 预先检查数据是否已存在
+                    check_tuple = (expected_date, suburb_name)
+                    
+                    if check_tuple in existing_data:
+                        print(f"{suburb_name} 在 {expected_date} 的数据已存在，跳过")
+                        skipped_count += 1
+                        continue
+                    
+                    # 如果数据不存在，才访问网页
                     data = get_property_data(url, driver)
                     if data:
-                        # 使用从网页提取的日期来检查是否已存在
-                        if (data['date'], suburb_name) in existing_data:
+                        # 再次检查实际日期（以防网页上的日期与预期不同）
+                        actual_check_tuple = (data['date'], suburb_name)
+                        
+                        if actual_check_tuple in existing_data:
                             print(f"\n{suburb_name} 在 {data['date']} 的数据已存在，跳过")
                             skipped_count += 1
                         else:
