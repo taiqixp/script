@@ -148,22 +148,25 @@ def get_property_data(url, driver):
             house_change_match = re.search(r'Houses in [^%]+ ([-\d.]+)% (?:increase|decrease)', stats_text)
             unit_change_match = re.search(r'Units have seen a ([-\d.]+)% (?:increase|decrease)', stats_text)
             
-            # 检查是否是decrease，如果是则将值变为负数
-            if house_change_match and 'decrease' in stats_text:
-                if not house_change_match.group(1).startswith('-'):
+            # 分别检查house和unit是increase还是decrease
+            house_increase = 0
+            unit_increase = 0
+            
+            if house_change_match:
+                # 提取house部分的文本来判断是increase还是decrease
+                house_text = re.search(r'Houses[^,]+(?:increase|decrease)', stats_text)
+                if house_text and 'decrease' in house_text.group():
                     house_increase = -float(house_change_match.group(1))
                 else:
                     house_increase = float(house_change_match.group(1))
-            else:
-                house_increase = float(house_change_match.group(1)) if house_change_match else 0
-                
-            if unit_change_match and 'decrease' in stats_text:
-                if not unit_change_match.group(1).startswith('-'):
+                    
+            if unit_change_match:
+                # 提取unit部分的文本来判断是increase还是decrease
+                unit_text = re.search(r'Units[^,]+(?:increase|decrease)', stats_text)
+                if unit_text and 'decrease' in unit_text.group():
                     unit_increase = -float(unit_change_match.group(1))
                 else:
                     unit_increase = float(unit_change_match.group(1))
-            else:
-                unit_increase = float(unit_change_match.group(1)) if unit_change_match else 0
             
             # 尝试从同一段文本中提取价值信息
             value_text = wait.until(EC.presence_of_element_located(
@@ -187,15 +190,17 @@ def get_property_data(url, driver):
                 house_value_match = house_value_match or re.search(r'Houses[^\$]+\$([\d,]+)', full_text)
                 unit_value_match = unit_value_match or re.search(r'Units[^\$]+\$([\d,]+)', full_text)
                 
-                # 再次检查decrease情况
-                if house_change_match and 'decrease' in full_text:
-                    if not house_change_match.group(1).startswith('-'):
+                # 再次检查decrease情况（如果之前没有匹配到）
+                if house_change_match and house_increase == 0:
+                    house_text = re.search(r'Houses[^,]+(?:increase|decrease)', full_text)
+                    if house_text and 'decrease' in house_text.group():
                         house_increase = -float(house_change_match.group(1))
                     else:
                         house_increase = float(house_change_match.group(1))
                         
-                if unit_change_match and 'decrease' in full_text:
-                    if not unit_change_match.group(1).startswith('-'):
+                if unit_change_match and unit_increase == 0:
+                    unit_text = re.search(r'Units[^,]+(?:increase|decrease)', full_text)
+                    if unit_text and 'decrease' in unit_text.group():
                         unit_increase = -float(unit_change_match.group(1))
                     else:
                         unit_increase = float(unit_change_match.group(1))
